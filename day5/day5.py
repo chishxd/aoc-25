@@ -1,29 +1,37 @@
-ranges = []
-ids = []
+raw_ranges = []
+raw_ids = []
 
 
 with open("day5/day5.txt") as f:
-    parse_line = True
-    for line in f:
-        line = line.strip()
-        if not line:
-            parse_line = False
-            continue
+    raw_ranges, raw_ids = f.read().strip().split("\n\n")
 
-        if parse_line:
-            a, b = map(int, line.split("-"))
-            ranges.append((a, b))
-        else:
-            ids.append(int(line))
+ranges = sorted(tuple(map(int, r.split("-"))) for r in raw_ranges.splitlines())
+ids = list(map(int, raw_ids.splitlines()))
 
-
-ranges.sort()
 merged = []
-for start, end in ranges:
-    if not merged or start > merged[-1][1] + 1:
-        merged.append([start, end])
+for s, e in ranges:
+    if not merged or s > merged[-1][1] + 1:
+        merged.append([s, e])
     else:
-        merged[-1][1] = max(merged[-1][1], end)
+        merged[-1][1] = max(merged[-1][1], e)
+
+fresh = 0
+for x in ids:
+    lo, hi, ans = 0, len(merged) - 1, -1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if merged[mid][0] <= x:
+            ans = mid
+            lo = mid + 1
+        else:
+            hi = mid - 1
+        if ans != -1:
+            s, e = merged[ans]
+            if s <= x <= e:
+                fresh += 1
+
+total = sum(e - s + 1 for s, e in merged)
+print(f"Part 1: {fresh}, Part 2: {total}")
 
 # spoiled = 0
 # fresh = 0
@@ -39,7 +47,7 @@ for start, end in ranges:
 #             ans = mid
 #         else:
 #             hi = mid - 1
-    
+
 #     if ans == -1:
 #         # print(f"{id} is spoiled")
 #         spoiled +=1
@@ -53,8 +61,8 @@ for start, end in ranges:
 #             spoiled += 1
 # print(fresh)
 
-total = 0
-for (s, e) in merged:
-    total += (e - s)+ 1
+# total = 0
+# for s, e in merged:
+#     total += (e - s) + 1
 
-print(total)
+# print(total)
